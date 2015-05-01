@@ -24,7 +24,7 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
 						$lon= $_GET['lon'];
     					$status= $_GET['status'];
 						if($lat != 0 && $lon!=0){
-							$dd=date('Y-m-d H:m:s',time());
+							$dd=date('Y-m-d H:i:s',time());
 							mysql_query("insert into location(missionID,soldierID,latitude,longitude,time,status) values 			($mission_id,$soldier_id,$lat,$lon,'$dd','$status')");
 						}
 				}
@@ -42,8 +42,21 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
             					$location["status"] = $row["status"];
                         			array_push($response["location"], $location);
 					}
-				}			
- 
+				}		
+				
+ 					$enemySQL= mysql_query("select * from enemy where missionID=$mission_id ");
+				if (mysql_num_rows($enemySQL) > 0) {
+					$response["enemy"] = array();
+					while ($row= mysql_fetch_array($enemySQL)){
+            					$enemy= array();
+								$enemy["id"] = $row["id"];
+								$enemy["missionID"] = $row["missionID"];
+            					$enemy["latitude"] = $row["latitude"];
+            					$enemy["longitude"] = $row["longitude"];
+            					$enemy["time"] = $row["time"];
+                        		array_push($response["enemy"], $enemy);
+					}
+				}
     $situationSQL= mysql_query("select * from location where missionID=$mission_id");
  
     if (!empty($situationSQL)) {
