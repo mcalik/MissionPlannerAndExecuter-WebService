@@ -23,7 +23,7 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
 				    	$lat= $_GET['lat'];
 						$lon= $_GET['lon'];
     					$status= $_GET['status'];
-						if($lat != 0 && $lon!=0){
+						if(($lat != 0 && $lon!=0)||$status != ""){
 							$dd=date('Y-m-d H:i:s',time());
 							mysql_query("insert into location(missionID,soldierID,latitude,longitude,time,status) values 			($mission_id,$soldier_id,$lat,$lon,'$dd','$status')");
 						}
@@ -57,6 +57,21 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
                         		array_push($response["enemy"], $enemy);
 					}
 				}
+				
+				$radioMessageSQL= mysql_query("select missionID,toSoldier,time,name,message from radio_message,soldier s,message_list m where m.id=messageID and missionID=$mission_id and (soldierID=-1 or soldierID=s.id) ORDER BY time DESC LIMIT 10");
+				if (mysql_num_rows($radioMessageSQL) > 0) {
+					$response["message"] = array();
+					while ($row= mysql_fetch_array($radioMessageSQL)){
+            					$message= array();
+								$message["missionID"] = $row["missionID"];
+            					$message["name"] = $row["name"];
+            					$message["toSoldier"] = $row["toSoldier"];
+            					$message["message"] = $row["message"];
+            					$message["time"] = $row["time"];
+                        		array_push($response["message"], $message);
+					}
+				}
+				
     $situationSQL= mysql_query("select * from location where missionID=$mission_id");
  
     if (!empty($situationSQL)) {
