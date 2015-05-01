@@ -13,7 +13,6 @@ require_once __DIR__ . '/db_connect.php';
  
 // connecting to db
 $db = new DB_CONNECT();
- date_default_timezone_set('Europe/Istanbul');
 
 if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
     $mission_id= $_GET['mission_id'];
@@ -29,6 +28,21 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
 							mysql_query("insert into location(missionID,soldierID,latitude,longitude,time,status) values 			($mission_id,$soldier_id,$lat,$lon,'$dd','$status')");
 						}
 				}
+				
+					$resultLocationSQL= mysql_query("select * from location where missionID=$mission_id and id in (select max(id) from location where missionID=$mission_id group by soldierID) group by soldierID;");
+				if (mysql_num_rows($resultLocationSQL) > 0) {
+					$response["location"] = array();
+					while ($row= mysql_fetch_array($resultLocationSQL)){
+            					$location= array();
+								$location["missionID"] = $row["missionID"];
+            					$location["soldierID"] = $row["soldierID"];
+            					$location["latitude"] = $row["latitude"];
+            					$location["longitude"] = $row["longitude"];
+            					$location["time"] = $row["time"];
+            					$location["status"] = $row["status"];
+                        			array_push($response["location"], $location);
+					}
+				}			
  
     $situationSQL= mysql_query("select * from location where missionID=$mission_id");
  
@@ -47,20 +61,7 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
 				$response["situation"]="STARTED";
 				
 				
-				$resultLocationSQL= mysql_query("select * from location where missionID=$mission_id and id in (select max(id) from location where missionID=$mission_id group by soldierID) group by soldierID;");
-				if (mysql_num_rows($resultLocationSQL) > 0) {
-					$response["location"] = array();
-					while ($row= mysql_fetch_array($resultLocationSQL)){
-            					$location= array();
-								$location["missionID"] = $row["missionID"];
-            					$location["soldierID"] = $row["soldierID"];
-            					$location["latitude"] = $row["latitude"];
-            					$location["longitude"] = $row["longitude"];
-            					$location["time"] = $row["time"];
-            					$location["status"] = $row["status"];
-                        			array_push($response["location"], $location);
-					}
-				}
+
 			}else{
 		     		$readySQL= mysql_query("select * from location where missionID=$mission_id and status='READY' and soldierID=$soldier_id");
 			     	$soldiersReadySQL= mysql_query("select * from location where missionID=$mission_id and status='READY'");
