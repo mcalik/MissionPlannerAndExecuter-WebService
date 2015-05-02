@@ -58,7 +58,7 @@ if (isset($_GET["mission_id"]) && isset($_GET["soldier_id"]) ) {
 					}
 				}
 				
-				$radioMessageSQL= mysql_query("select missionID,toSoldier,time,name,message from radio_message,soldier s,message_list m where m.id=messageID and missionID=$mission_id and (soldierID=-1 or soldierID=s.id) ORDER BY time DESC LIMIT 10");
+				$radioMessageSQL= mysql_query("select missionID,toSoldier,time,name,message from radio_message,soldier s,message_list m where m.id=messageID and missionID=$mission_id and soldierID=s.id and (toSoldier=-1 or toSoldier=$soldier_id) ORDER BY time DESC LIMIT 10");
 				if (mysql_num_rows($radioMessageSQL) > 0) {
 					$response["message"] = array();
 					while ($row= mysql_fetch_array($radioMessageSQL)){
